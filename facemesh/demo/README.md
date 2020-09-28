@@ -4,12 +4,18 @@
 
 The MediaPipe Facemesh demo shows how to use the MediaPipe Facemesh model to estimate keypoints on a face.
 
+*Gas edit: I've added couple geometric heuristics to be able to detec simple reactions, like: is a person is in front of a camera, is person smiles, is there a thumbs-up/down gesture and so on. (also to run the demo you need a pretrained handpose along with facemesh).*
+
 ## Setup
 
 cd into the demo folder:
 
 ```sh
 cd facemesh/demo
+```
+Add handpose model deps, for demo purposes:
+```
+yarn add @tensorflow-models/handpose
 ```
 
 Install dependencies and prepare the build directory:
