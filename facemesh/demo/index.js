@@ -111,7 +111,7 @@ async function renderPrediction() {
   if (counter % 6 && counter > 1) {
     facePredictions = await faceMeshModel.estimateFaces(video);
     reaction = faceReactions.getReaction(facePredictions);
-    if (reaction.length) {
+    if (reaction.length && reaction !== emojiContainer.innerHTML) {
       emojiContainer.innerHTML = reaction;
     }
   } else if (counter % 7 && counter > 1) {
@@ -119,7 +119,9 @@ async function renderPrediction() {
     // check if the face was detected before
     if (facePredictions.length) {
       reaction = handReactions.getReaction(handPredictions);
-      handsEmojiContainer.innerHTML = reaction;
+      if (reaction !== handsEmojiContainer.innerHTML) {
+        handsEmojiContainer.innerHTML = reaction;
+      }
     } else {
       handsEmojiContainer.innerHTML = "";
     }

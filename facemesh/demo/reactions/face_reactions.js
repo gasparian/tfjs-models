@@ -1,7 +1,7 @@
 import * as helpers from "./helpers.js";
 
 export default class FaceReactions {
-  constructor(minDetections = 3, lipsCosThrsh = 0.3, headCosThrsh = 0.4) {
+  constructor(minDetections = 3, lipsCosThrshInit = 0.64, headCosThrsh = 0.4) {
     this.emojis = {
       neutral: String.fromCodePoint("0x1F610"),
       shadow: String.fromCodePoint("0x1F47B"),
@@ -9,7 +9,8 @@ export default class FaceReactions {
       seeNoEvil: String.fromCodePoint("0x1F648"),
     };
     this.headCosThrsh = headCosThrsh;
-    this.lipsCosThrsh = lipsCosThrsh;
+    this.lipsCosThrshInit = lipsCosThrshInit;
+    this.lipsCosThrsh = lipsCosThrshInit;
     this.minDetections = minDetections;
     this.counters = {
       seeNoEvil: 0,
@@ -19,6 +20,7 @@ export default class FaceReactions {
     };
     this.faceVerticalCentralPoint = -1;
     this.faceHorizontalCentralPoint = -1;
+    this.looper = new helpers.Looper();
   }
 
   getHeadAnglesCos(keypoints) {
@@ -60,7 +62,16 @@ export default class FaceReactions {
   }
 
   getLipsAngleSin(keypoints) {
-    const lipsCentralPoint = keypoints[17];
+    // TO DO: work on cases when the person speaks
+    // now use hard-coded abs. dist. btw lips keypoints
+    if (keypoints[17][1] - keypoints[13][1] >= 30) {
+      return 1.0;
+    }
+
+    const lipsCentralPoint = helpers.getMeanPoint([
+      keypoints[13],
+      keypoints[14],
+    ]);
     const lipsLeftCorner = keypoints[61];
     const lipsRightCorner = keypoints[291];
 
@@ -94,7 +105,18 @@ export default class FaceReactions {
       for (const prediction of facePredictions) {
         const keypoints = prediction.scaledMesh;
         const headAnglesCos = this.getHeadAnglesCos(keypoints);
-        const lipsCos = this.getLipsAngleSin(keypoints, headAnglesCos);
+        const lipsCos = Math.abs(
+          this.getLipsAngleSin(keypoints, headAnglesCos)
+        );
+        this.looper.put(lipsCos);
+        const lipsCosRel = lipsCos / this.looper.average;
+        if (lipsCosRel <= 0.95) {
+          this.lipsCosThrsh = lipsCos + lipsCos * 0.05;
+        }
+
+        // DEBUG
+        // console.log(lipsCos, this.lipsCosThrsh);
+        //
 
         if (
           Math.abs(headAnglesCos.verticalCos) > this.headCosThrsh ||
@@ -102,7 +124,8 @@ export default class FaceReactions {
         ) {
           return this.countCheck("seeNoEvil");
         } else if (
-          Math.abs(lipsCos) <= this.lipsCosThrsh &&
+          lipsCos <= this.lipsCosThrsh &&
+          lipsCos <= this.lipsCosThrshInit &&
           Math.abs(headAnglesCos.horizontalCos) <= 0.3
         ) {
           return this.countCheck("smiley");

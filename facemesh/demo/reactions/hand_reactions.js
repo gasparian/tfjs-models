@@ -6,7 +6,7 @@ export default class HandReactions {
     maxBboxRatio = 1.5,
     thumbRatioDiff = 0.2,
     minDetections = 1,
-    minHandAngleCos = 0.8
+    minHandAngleCos = 0.7
   ) {
     this.emojis = {
       waving: String.fromCodePoint("0x1F44B"),

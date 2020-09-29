@@ -1,5 +1,45 @@
 import { assert } from "console";
 
+export class Looper {
+  constructor(cap = 10) {
+    this.cap = cap;
+    this.array = [];
+  }
+
+  clear() {
+    this.array = [];
+  }
+
+  put(val) {
+    if (this.array.length + 1 > this.cap) {
+      this.array.shift();
+    }
+    this.array.push(val);
+  }
+
+  get average() {
+    let res = 0;
+    this.array.forEach((val) => {
+      res += val;
+    });
+    return res / this.array.length;
+  }
+}
+
+export function getMeanPoint(points) {
+  const size = points.length;
+  assert(size > 0);
+  const len = points[0].length;
+  const result = new Array(len).fill(0);
+  for (const point of points) {
+    assert(point.length === len);
+    for (let i = 0; i < len; i++) {
+      result[i] += point[i] / size;
+    }
+  }
+  return result;
+}
+
 export function Bbox2D(bbox) {
   const { topLeft, bottomRight } = bbox;
   return {
@@ -91,7 +131,6 @@ export function crossProd(points) {
 
 export class Plane {
   constructor(points) {
-    // cross product
     const [a, b, c] = crossProd(points);
     const d = -1 * (a * points[0][0] + b * points[0][1] + c * points[0][2]);
     this.coefs = { a, b, c, d };
