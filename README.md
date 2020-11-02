@@ -1,3 +1,7 @@
+***Gas:***  
+Check out `/facemesh/demo`, I've added simple face/hand reactions detection.  
+Also I have a demo (video)[https://youtu.be/fc6MuOkEXxE].  
+
 # Pre-trained TensorFlow.js models
 
 This repository hosts a set of pre-trained models that have been ported to
